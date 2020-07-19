@@ -1,11 +1,19 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
+	addr := flag.String("addr", ":4000", "HTTP network address")
+	flag.Parse()
+
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/snippet", showSnippet)
@@ -16,7 +24,14 @@ func main() {
 	// all URL paths that start with "/static/". For matching paths, we strip the
 	// "/static" prefix before the request reaches the file server
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	log.Println("starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
+
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
+	infoLog.Printf("starting server on %s\n", *addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
