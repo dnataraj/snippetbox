@@ -4,15 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dnataraj/snippetbox/pkg/models"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
+	/*
+		if r.URL.Path != "/" {
+			app.notFound(w)
+			return
+		}
+		// do we still need this?
+	*/
 
 	s, err := app.snippets.Latest()
 	if err != nil {
@@ -26,7 +30,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -48,12 +53,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("create a new snippet..."))
+}
+
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
 	title := "O snail"
 	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
 	expires := "7"
