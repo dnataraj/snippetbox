@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 	// Use the mux.Handle() function to register the file server as the handler for
 	// all URL paths that start with "/static/". For matching paths, we strip the
 	// "/static" prefix before the request reaches the file server
-	r.Handle("/static/", http.StripPrefix("/static", fileServer)).Methods(http.MethodGet)
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static", fileServer)).Methods(http.MethodGet)
 
 	return stdMiddleware.Then(r)
 }
