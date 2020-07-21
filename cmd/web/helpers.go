@@ -23,11 +23,30 @@ func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
-func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
+func (app *application) addDefaultData(td *templateData, w http.ResponseWriter, r *http.Request) *templateData {
 	if td == nil {
 		td = &templateData{}
 	}
 	td.CurrentYear = time.Now().Year()
+
+	// add flash messages, if any
+	session, err := app.store.Get(r, "snippetbox-session")
+	if err != nil {
+		app.serverError(w, err)
+		return nil
+	}
+
+	var flash = ""
+	if f := session.Flashes(); len(f) > 0 {
+		flash = f[0].(string)
+	}
+	err = session.Save(r, w)
+	if err != nil {
+		app.serverError(w, err)
+		return nil
+	}
+	td.Flash = flash
+
 	return td
 }
 
@@ -39,9 +58,10 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	}
 	buf := new(bytes.Buffer)
 
-	err := ts.Execute(buf, app.addDefaultData(td, r))
+	err := ts.Execute(buf, app.addDefaultData(td, w, r))
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
 
 	buf.WriteTo(w)

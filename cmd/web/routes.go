@@ -16,6 +16,12 @@ func (app *application) routes() http.Handler {
 	r.HandleFunc("/snippet/create", app.createSnippet).Methods(http.MethodPost)
 	r.HandleFunc("/snippet/{id}", app.showSnippet).Methods(http.MethodGet)
 
+	r.HandleFunc("/user/signup", app.signupUserForm).Methods(http.MethodGet)
+	r.HandleFunc("/user/signup", app.signupUser).Methods(http.MethodPost)
+	r.HandleFunc("/user/login", app.loginUserForm).Methods(http.MethodGet)
+	r.HandleFunc("/user/login", app.loginUser).Methods(http.MethodPost)
+	r.HandleFunc("/user/logout", app.logoutUser).Methods(http.MethodPost)
+
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	// Use the mux.Handle() function to register the file server as the handler for
 	// all URL paths that start with "/static/". For matching paths, we strip the
