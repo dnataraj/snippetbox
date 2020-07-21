@@ -48,7 +48,24 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, err := app.store.Get(r, "snippetbox-session")
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	var flash = ""
+	if f := session.Flashes(); len(f) > 0 {
+		flash = f[0].(string)
+	}
+	err = session.Save(r, w)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	app.render(w, r, "show.page.tmpl", &templateData{
+		Flash:   flash,
 		Snippet: s,
 	})
 
@@ -78,6 +95,18 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id, err := app.snippets.Insert(form.Get("title"), form.Get("content"), form.Get("expires"))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	session, err := app.store.Get(r, "snippetbox-session")
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	session.AddFlash("Snippet successfully created!")
+	err = session.Save(r, w)
 	if err != nil {
 		app.serverError(w, err)
 		return

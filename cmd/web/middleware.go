@@ -36,3 +36,20 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (app *application) enableSession(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := app.store.Get(r, "snippetbox-session")
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		err = session.Save(r, w)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
