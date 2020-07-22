@@ -83,13 +83,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := app.store.Get(r, "snippetbox-session")
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-	session.AddFlash("Snippet successfully created!")
-	err = session.Save(r, w)
+	err = app.addFlash(w, r, "Snippet successfully created!")
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -123,7 +117,24 @@ func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(w, "Create a new user...")
+	err = app.users.Insert(form.Get("name"), form.Get("email"), form.Get("password"))
+	if err != nil {
+		if errors.Is(err, models.ErrDuplicateEmail) {
+			form.Errors.Add("email", "Address is already in use")
+			app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	err = app.addFlash(w, r, "Your signup was successful. Please log in.")
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {

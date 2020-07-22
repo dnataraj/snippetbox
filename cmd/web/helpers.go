@@ -66,3 +66,17 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 
 	buf.WriteTo(w)
 }
+
+func (app *application) addFlash(w http.ResponseWriter, r *http.Request, msg string) error {
+	session, err := app.store.Get(r, "snippetbox-session")
+	if err != nil {
+		return err
+	}
+	session.AddFlash(msg)
+	err = session.Save(r, w)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
