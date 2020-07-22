@@ -47,6 +47,8 @@ func (app *application) addDefaultData(td *templateData, w http.ResponseWriter, 
 	}
 	td.Flash = flash
 
+	td.IsAuthenticated = app.isAuthenticated(r)
+
 	return td
 }
 
@@ -79,4 +81,14 @@ func (app *application) addFlash(w http.ResponseWriter, r *http.Request, msg str
 	}
 
 	return nil
+}
+
+func (app *application) isAuthenticated(r *http.Request) bool {
+	session, err := app.store.Get(r, "snippetbox-session")
+	if err != nil {
+		app.errorLog.Println("unable to read session", err)
+		return false
+	}
+	_, ok := session.Values["authenticatedUserID"]
+	return ok
 }

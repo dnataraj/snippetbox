@@ -49,7 +49,7 @@ func main() {
 	store.Options = &sessions.Options{
 		MaxAge: 43200,
 		Secure: true,
-		//Path:   "/snippetbox",
+		Path:   "/",
 	}
 
 	app := &application{
