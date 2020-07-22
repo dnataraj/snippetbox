@@ -48,6 +48,8 @@ func main() {
 	store := sessions.NewCookieStore([]byte(*secret))
 	store.Options = &sessions.Options{
 		MaxAge: 43200,
+		Secure: true,
+		//Path:   "/snippetbox",
 	}
 
 	app := &application{
