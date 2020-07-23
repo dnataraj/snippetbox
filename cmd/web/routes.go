@@ -24,6 +24,8 @@ func (app *application) routes() http.Handler {
 	r.Handle("/user/login", dynMiddleware.ThenFunc(app.loginUser)).Methods(http.MethodPost)
 	r.Handle("/user/logout", dynMiddleware.Append(app.requireAuthentication).ThenFunc(app.logoutUser)).Methods(http.MethodPost)
 
+	r.HandleFunc("/ping", ping).Methods(http.MethodGet)
+
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	// Use the mux.Handle() function to register the file server as the handler for
 	// all URL paths that start with "/static/". For matching paths, we strip the

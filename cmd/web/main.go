@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"flag"
+	"github.com/dnataraj/snippetbox/pkg/models"
 	"github.com/dnataraj/snippetbox/pkg/models/mysql"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -21,13 +22,21 @@ type contextKey string
 const contextKeyIsAuthenticated = contextKey("isAuthenticated")
 
 type application struct {
-	errorLog      *log.Logger
-	infoLog       *log.Logger
-	snippets      *mysql.SnippetModel
+	errorLog *log.Logger
+	infoLog  *log.Logger
+	snippets interface {
+		Insert(string, string, string) (int, error)
+		Get(int) (*models.Snippet, error)
+		Latest() ([]*models.Snippet, error)
+	}
 	store         sessions.Store
 	templateCache map[string]*template.Template
-	users         *mysql.UserModel
-	secret        string
+	users         interface {
+		Insert(string, string, string) error
+		Authenticate(string, string) (int, error)
+		Get(int) (*models.User, error)
+	}
+	secret string
 }
 
 func main() {
