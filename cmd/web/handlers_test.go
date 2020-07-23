@@ -86,13 +86,13 @@ func TestSignupUser(t *testing.T) {
 		{"Invalid email (missing local part)", "Bob", "@example.com", "validPa$$word", csrfToken, http.StatusOK, []byte("This field is invalid")},
 		{"Short password", "Bob", "bob@example.com", "pa$$word", csrfToken, http.StatusOK, []byte("This field is too short (minimum is 10 characters)")},
 		{"Duplicate email", "Bob", "dupe@example.com", "validPa$$word", csrfToken, http.StatusOK, []byte("Address is already in use")},
-		{"Invalid CSRF Token", "", "", "", "wrongToken", http.StatusBadRequest, nil},
+		{"Invalid CSRF Token", "", "", "", "wrongToken", http.StatusForbidden, nil},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			form := url.Values{}
-			form.Add("name", tt.name)
+			form.Add("name", tt.userName)
 			form.Add("email", tt.userEmail)
 			form.Add("password", tt.userPassword)
 			form.Add("gorilla.csrf.Token", tt.csrfToken)
