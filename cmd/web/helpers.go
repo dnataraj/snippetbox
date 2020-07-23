@@ -86,11 +86,10 @@ func (app *application) addFlash(w http.ResponseWriter, r *http.Request, msg str
 }
 
 func (app *application) isAuthenticated(r *http.Request) bool {
-	session, err := app.store.Get(r, "snippetbox-session")
-	if err != nil {
-		app.errorLog.Println("unable to read session", err)
+	isAuthenticated, ok := r.Context().Value(contextKeyIsAuthenticated).(bool)
+	if !ok {
 		return false
 	}
-	_, ok := session.Values["authenticatedUserID"]
-	return ok
+
+	return isAuthenticated
 }

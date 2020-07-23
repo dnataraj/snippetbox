@@ -10,7 +10,7 @@ import (
 func (app *application) routes() http.Handler {
 	// common middleware
 	stdMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
-	dynMiddleware := alice.New(csrf.Protect([]byte(app.secret)))
+	dynMiddleware := alice.New(csrf.Protect([]byte(app.secret)), app.authenticate)
 
 	r := mux.NewRouter()
 	r.Handle("/", dynMiddleware.ThenFunc(app.home)).Methods(http.MethodGet)

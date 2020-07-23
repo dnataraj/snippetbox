@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/dnataraj/snippetbox/pkg/models"
 	"net/http"
 )
 
@@ -64,5 +67,37 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 		w.Header().Add("Cache-Control", "no-store")
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := app.store.Get(r, "snippetbox-session")
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		id, ok := session.Values["authenticatedUserID"]
+		// if there is no authenticated session, carry on
+		if !ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// fetch the user
+		user, err := app.users.Get(id.(int))
+		// if the user does not exist, or is not active, clear the session
+		if errors.Is(err, models.ErrNoRecord) || !user.Active {
+			delete(session.Values, "authenticatedUserID")
+			session.Save(r, w)
+			next.ServeHTTP(w, r)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextKeyIsAuthenticated, true)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
