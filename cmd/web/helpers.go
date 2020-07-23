@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/gorilla/csrf"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -27,6 +28,7 @@ func (app *application) addDefaultData(td *templateData, w http.ResponseWriter, 
 	if td == nil {
 		td = &templateData{}
 	}
+	td.CSRFToken = csrf.Token(r)
 	td.CurrentYear = time.Now().Year()
 
 	// add flash messages, if any

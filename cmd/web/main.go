@@ -23,6 +23,7 @@ type application struct {
 	store         sessions.Store
 	templateCache map[string]*template.Template
 	users         *mysql.UserModel
+	secret        string
 }
 
 func main() {
@@ -59,6 +60,7 @@ func main() {
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 		users:         &mysql.UserModel{DB: db},
+		secret:        *secret,
 	}
 
 	tlsConfig := &tls.Config{

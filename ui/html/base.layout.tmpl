@@ -22,6 +22,7 @@
             <div>
                 {{if .IsAuthenticated}}
                     <form action="/user/logout" method="post">
+                        <input type="hidden" name="gorilla.csrf.Token" value="{{.CSRFToken}}">
                         <button>Logout</button>
                     </form>
                 {{else}}

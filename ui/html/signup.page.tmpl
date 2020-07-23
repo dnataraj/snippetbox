@@ -4,6 +4,7 @@
 
 {{define "main"}}
     <form action="/user/signup" method="post" novalidate>
+        <input type="hidden" name="gorilla.csrf.Token" value="{{.CSRFToken}}">
         {{with .Form}}
             <div>
                 <label>Name:</label>
