@@ -89,6 +89,10 @@ func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
